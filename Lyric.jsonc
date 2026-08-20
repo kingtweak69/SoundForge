@@ -1,0 +1,56 @@
+{
+  "name": "Lyric",
+  "type": "object",
+  "properties": {
+    "projectId": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "structure": {
+      "type": "object",
+      "properties": {
+        "intro": {
+          "type": "string"
+        },
+        "verse": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "preChorus": {
+          "type": "string"
+        },
+        "chorus": {
+          "type": "string"
+        },
+        "bridge": {
+          "type": "string"
+        },
+        "outro": {
+          "type": "string"
+        }
+      },
+      "default": {}
+    },
+    "language": {
+      "type": "string",
+      "default": "English"
+    },
+    "genre": {
+      "type": "string"
+    },
+    "rhymeScheme": {
+      "type": "string",
+      "default": "AABB"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

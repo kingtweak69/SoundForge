@@ -1,0 +1,33 @@
+{
+  "name": "InstrumentPreset",
+  "type": "object",
+  "properties": {
+    "instrumentType": {
+      "type": "string",
+      "enum": [
+        "synth",
+        "drum-machine",
+        "sampler",
+        "piano",
+        "bass-synth",
+        "pad",
+        "arpeggiator"
+      ]
+    },
+    "name": {
+      "type": "string"
+    },
+    "parameters": {
+      "type": "object",
+      "default": {}
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "instrumentType",
+    "name"
+  ]
+}

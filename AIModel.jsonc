@@ -1,0 +1,50 @@
+{
+  "name": "AIModel",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "generation",
+        "voice-clone",
+        "voice-change",
+        "lyrics"
+      ],
+      "default": "generation"
+    },
+    "engine": {
+      "type": "string",
+      "enum": [
+        "local",
+        "cloud"
+      ],
+      "default": "local"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "installed",
+        "not-installed",
+        "downloading"
+      ],
+      "default": "not-installed"
+    },
+    "size": {
+      "type": "string"
+    },
+    "path": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "type",
+    "engine"
+  ]
+}

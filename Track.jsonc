@@ -1,0 +1,65 @@
+{
+  "name": "Track",
+  "type": "object",
+  "properties": {
+    "projectId": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "audio",
+        "midi",
+        "drum",
+        "ai-generated",
+        "voice"
+      ],
+      "default": "audio"
+    },
+    "color": {
+      "type": "string",
+      "default": "#00f0ff"
+    },
+    "volume": {
+      "type": "number",
+      "default": 0.8
+    },
+    "pan": {
+      "type": "number",
+      "default": 0
+    },
+    "muted": {
+      "type": "boolean",
+      "default": false
+    },
+    "soloed": {
+      "type": "boolean",
+      "default": false
+    },
+    "recordArmed": {
+      "type": "boolean",
+      "default": false
+    },
+    "clips": {
+      "type": "array",
+      "items": {},
+      "default": []
+    },
+    "effects": {
+      "type": "array",
+      "items": {},
+      "default": []
+    },
+    "order": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "projectId",
+    "name"
+  ]
+}

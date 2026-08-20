@@ -1,0 +1,77 @@
+{
+  "name": "GeneratedTrack",
+  "type": "object",
+  "properties": {
+    "projectId": {
+      "type": "string"
+    },
+    "prompt": {
+      "type": "string"
+    },
+    "genre": {
+      "type": "string"
+    },
+    "mood": {
+      "type": "string"
+    },
+    "bpm": {
+      "type": "number"
+    },
+    "key": {
+      "type": "string"
+    },
+    "structure": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "Intro",
+        "Verse",
+        "Chorus",
+        "Verse",
+        "Chorus",
+        "Outro"
+      ]
+    },
+    "duration": {
+      "type": "number",
+      "default": 60
+    },
+    "quality": {
+      "type": "string",
+      "enum": [
+        "Standard",
+        "High",
+        "Ultra"
+      ],
+      "default": "High"
+    },
+    "engine": {
+      "type": "string",
+      "enum": [
+        "local",
+        "cloud"
+      ],
+      "default": "local"
+    },
+    "audioUrl": {
+      "type": "string"
+    },
+    "lyricsUsed": {
+      "type": "string"
+    },
+    "instrumental": {
+      "type": "boolean",
+      "default": false
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "prompt",
+    "genre"
+  ]
+}

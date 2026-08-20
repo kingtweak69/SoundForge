@@ -1,0 +1,53 @@
+{
+  "name": "Collaborator",
+  "type": "object",
+  "properties": {
+    "projectId": {
+      "type": "string"
+    },
+    "userId": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "editor",
+        "viewer"
+      ],
+      "default": "viewer"
+    },
+    "permissions": {
+      "type": "object",
+      "properties": {
+        "edit": {
+          "type": "boolean",
+          "default": false
+        },
+        "mix": {
+          "type": "boolean",
+          "default": false
+        },
+        "export": {
+          "type": "boolean",
+          "default": false
+        },
+        "invite": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "default": {}
+    },
+    "invitedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "projectId",
+    "email"
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "name": "Project",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "genre": {
+      "type": "string"
+    },
+    "bpm": {
+      "type": "number"
+    },
+    "keySignature": {
+      "type": "string"
+    },
+    "timeSignature": {
+      "type": "string",
+      "default": "4/4"
+    },
+    "duration": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "in-progress",
+        "mastered",
+        "exported"
+      ],
+      "default": "draft"
+    },
+    "coverImage": {
+      "type": "string"
+    },
+    "tracks": {
+      "type": "array",
+      "items": {},
+      "default": []
+    },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "sampleRate": {
+          "type": "number",
+          "default": 44100
+        },
+        "bitDepth": {
+          "type": "number",
+          "default": 24
+        },
+        "artist": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+    "lastModified": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

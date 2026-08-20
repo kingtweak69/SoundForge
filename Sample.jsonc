@@ -1,0 +1,62 @@
+{
+  "name": "Sample",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Drums",
+        "Bass",
+        "Synths",
+        "Guitars",
+        "Vocals",
+        "FX",
+        "Orchestral",
+        "World"
+      ]
+    },
+    "genre": {
+      "type": "string"
+    },
+    "bpm": {
+      "type": "number"
+    },
+    "key": {
+      "type": "string"
+    },
+    "fileUrl": {
+      "type": "string"
+    },
+    "duration": {
+      "type": "number"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "loop",
+        "one-shot"
+      ],
+      "default": "loop"
+    },
+    "favorite": {
+      "type": "boolean",
+      "default": false
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "library",
+        "uploaded",
+        "ai-generated"
+      ],
+      "default": "library"
+    }
+  },
+  "required": [
+    "name",
+    "category"
+  ]
+}

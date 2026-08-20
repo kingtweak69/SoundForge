@@ -1,0 +1,49 @@
+{
+  "name": "MasterPreset",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "targetLoudness": {
+      "type": "number"
+    },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "compressor": {
+          "type": "object"
+        },
+        "eq": {
+          "type": "object"
+        },
+        "limiter": {
+          "type": "object"
+        },
+        "stereoWidth": {
+          "type": "number"
+        }
+      },
+      "default": {}
+    },
+    "description": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "spotify",
+        "apple",
+        "club",
+        "cd",
+        "radio",
+        "custom"
+      ],
+      "default": "custom"
+    }
+  },
+  "required": [
+    "name",
+    "type"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "name": "VoiceProfile",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "referenceAudioUrl": {
+      "type": "string"
+    },
+    "modelUsed": {
+      "type": "string"
+    },
+    "pitch": {
+      "type": "number",
+      "default": 0
+    },
+    "formant": {
+      "type": "number",
+      "default": 0
+    },
+    "stability": {
+      "type": "number",
+      "default": 0.75
+    },
+    "clarity": {
+      "type": "number",
+      "default": 0.8
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "name",
+    "modelUsed"
+  ]
+}

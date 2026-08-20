@@ -1,0 +1,46 @@
+{
+  "name": "Clip",
+  "type": "object",
+  "properties": {
+    "trackId": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "audio",
+        "midi"
+      ],
+      "default": "audio"
+    },
+    "startTime": {
+      "type": "number",
+      "default": 0
+    },
+    "duration": {
+      "type": "number",
+      "default": 4
+    },
+    "fileUrl": {
+      "type": "string"
+    },
+    "waveform": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "default": []
+    },
+    "notes": {
+      "type": "array",
+      "items": {},
+      "default": []
+    },
+    "name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "trackId"
+  ]
+}

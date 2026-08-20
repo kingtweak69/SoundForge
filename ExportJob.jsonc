@@ -1,0 +1,59 @@
+{
+  "name": "ExportJob",
+  "type": "object",
+  "properties": {
+    "projectId": {
+      "type": "string"
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "WAV",
+        "MP3",
+        "FLAC",
+        "AIFF",
+        "OGG",
+        "M4A",
+        "MIDI"
+      ],
+      "default": "WAV"
+    },
+    "quality": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "mix",
+        "stems",
+        "region",
+        "midi"
+      ],
+      "default": "mix"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processing",
+        "completed",
+        "failed"
+      ],
+      "default": "pending"
+    },
+    "fileUrl": {
+      "type": "string"
+    },
+    "fileSize": {
+      "type": "number"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "projectId",
+    "format"
+  ]
+}
