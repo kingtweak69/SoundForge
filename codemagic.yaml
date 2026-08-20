@@ -1,11 +1,16 @@
 # SoundForge — Codemagic CI
 #
-#   ios-soundforge            signed ad-hoc IPA (needs the App Store Connect integration)
-#   ios-soundforge-unsigned   unsigned IPA for sideloading
+#   ios-soundforge            signed ad-hoc IPA (App Store Connect integration + a registered device)
+#   ios-soundforge-unsigned   unsigned IPA for sideloading (no Apple account needed)
 #   web                       plain web bundle, no Mac minutes burned
 #
 # There is no committed Xcode project — Capacitor generates ios/ during the
 # build from the Vite output in dist/.
+#
+# ios-soundforge prerequisites (see notes at the bottom of this file):
+#   1. At least one iOS device UDID registered on the Apple Developer account.
+#   2. CERTIFICATE_PRIVATE_KEY set in Codemagic env (group: appstore) so the
+#      CLI can create/reuse a distribution certificate.
 
 workflows:
 
@@ -16,12 +21,13 @@ workflows:
     integrations:
       app_store_connect: codemagic
     environment:
+      groups:
+        - appstore
+      vars:
+        BUNDLE_ID: "com.kingtweak69.soundforge"
       xcode: latest
       cocoapods: default
       node: 20
-      ios_signing:
-        distribution_type: ad_hoc
-        bundle_identifier: com.kingtweak69.soundforge
     scripts:
       - name: Install Node dependencies
         script: npm install --no-audit --no-fund
@@ -48,6 +54,12 @@ workflows:
           fi
           npx cap sync ios
 
+      - name: Force the bundle identifier into the Xcode project
+        script: |
+          cd ios/App
+          sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = [^;]*;/PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID;/g" App.xcodeproj/project.pbxproj
+          grep -m1 PRODUCT_BUNDLE_IDENTIFIER App.xcodeproj/project.pbxproj
+
       - name: Add microphone and audio permissions
         script: |
           PLIST=ios/App/App/Info.plist
@@ -56,6 +68,20 @@ workflows:
           /usr/libexec/PlistBuddy -c "Delete :UIBackgroundModes" "$PLIST" 2>/dev/null || true
           /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes array" "$PLIST"
           /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes:0 string audio" "$PLIST"
+
+      - name: Report registered devices
+        script: |
+          echo "--- devices on the account (ad-hoc profiles need at least one) ---"
+          app-store-connect devices list --platform IOS 2>&1 | tail -40 || echo "device listing failed — continuing"
+
+      - name: Initialize keychain
+        script: keychain initialize
+
+      - name: Fetch or create signing files
+        script: app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_ADHOC --create
+
+      - name: Add certificates to keychain
+        script: keychain add-certificates
 
       - name: Apply iOS signing
         script: xcode-project use-profiles
@@ -71,6 +97,8 @@ workflows:
     max_build_duration: 60
     instance_type: mac_mini_m2
     environment:
+      vars:
+        BUNDLE_ID: "com.kingtweak69.soundforge"
       xcode: latest
       cocoapods: default
       node: 20
@@ -99,6 +127,12 @@ workflows:
             npx cap add ios
           fi
           npx cap sync ios
+
+      - name: Force the bundle identifier into the Xcode project
+        script: |
+          cd ios/App
+          sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = [^;]*;/PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID;/g" App.xcodeproj/project.pbxproj
+          grep -m1 PRODUCT_BUNDLE_IDENTIFIER App.xcodeproj/project.pbxproj
 
       - name: Add microphone and audio permissions
         script: |
@@ -119,14 +153,18 @@ workflows:
             -derivedDataPath build/dd \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_ENTITLEMENTS="" \
             build
 
       - name: Package unsigned IPA
         script: |
           APP=$(find build/dd -name 'App.app' -type d | head -1)
           test -n "$APP" || { echo "No App.app produced"; exit 1; }
+          rm -rf build/Payload
           mkdir -p build/Payload
           cp -R "$APP" build/Payload/
+          rm -rf build/Payload/App.app/_CodeSignature
           cd build && zip -qry SoundForge-unsigned.ipa Payload
           ls -lh SoundForge-unsigned.ipa
     artifacts:
@@ -157,3 +195,31 @@ workflows:
         script: cd dist && zip -qry ../SoundForge-web.zip .
     artifacts:
       - SoundForge-web.zip
+
+# ---------------------------------------------------------------------------
+# Why the old ios-soundforge failed
+#
+# The environment.ios_signing: block is Codemagic's automatic signing. It looks
+# up a provisioning profile that already exists for the bundle id + distribution
+# type. Nothing had ever created one for com.kingtweak69.soundforge, so the
+# lookup came back empty:
+#
+#   No matching profiles found for bundle identifier "com.kingtweak69.soundforge"
+#   and distribution type "ad_hoc"
+#
+# This config drops ios_signing: and calls the CLI directly with --create, which
+# registers the App ID and generates the profile on the spot.
+#
+# Two things --create still cannot invent for you:
+#
+#   1. A registered device. Apple will not issue an ad-hoc profile for a team
+#      with zero devices. Register one from any machine that has the CLI:
+#        app-store-connect devices register --name iphone --platform IOS --udid YOUR_UDID
+#      Or add the UDID at developer.apple.com under Devices.
+#
+#   2. A distribution certificate with a private key Codemagic can reach. Set
+#      CERTIFICATE_PRIVATE_KEY in the "appstore" env group (an RSA private key).
+#      Generate one with:
+#        ssh-keygen -t rsa -b 2048 -m PEM -f cert_key -q -N ""
+#      and paste the contents of cert_key into the variable, marked secure.
+# ---------------------------------------------------------------------------
