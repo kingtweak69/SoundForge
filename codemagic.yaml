@@ -1,27 +1,62 @@
-workflows:
-  ios-soundforge:
-    name: SoundForge iOS
+definitions:
+  base_ios: &base_ios
     max_build_duration: 60
     instance_type: mac_mini_m2
+    environment:
+      xcode: latest
+      cocoapods: default
+      node: 20
+
+  build_web: &build_web
+    - name: Install Node dependencies
+      script: npm install --no-audit --no-fund
+    - name: Build web app
+      script: npm run build:web
+    - name: Verify the bundle is real
+      script: |
+        test -f dist/index.html || { echo "No dist/index.html — vite build produced nothing"; exit 1; }
+        CSS=$(find dist/assets -name '*.css' | head -1)
+        SIZE=$(wc -c < "$CSS")
+        echo "CSS bundle: $SIZE bytes"
+        if [ "$SIZE" -lt 20000 ]; then
+          echo "CSS is only $SIZE bytes — Tailwind scanned nothing. Check the content globs in tailwind.config.js."
+          exit 1
+        fi
+        grep -q createStereoPanner dist/assets/*.js || { echo "Audio engine missing from the bundle"; exit 1; }
+
+  make_ios: &make_ios
+    - name: Create iOS project
+      script: |
+        if [ ! -d "ios" ]; then
+          npx cap add ios
+        fi
+        npx cap sync ios
+    - name: Add microphone and audio permissions
+      script: |
+        PLIST=ios/App/App/Info.plist
+        /usr/libexec/PlistBuddy -c "Delete :NSMicrophoneUsageDescription" "$PLIST" 2>/dev/null || true
+        /usr/libexec/PlistBuddy -c "Add :NSMicrophoneUsageDescription string 'SoundForge uses the microphone to record vocal takes into your project.'" "$PLIST"
+        /usr/libexec/PlistBuddy -c "Delete :UIBackgroundModes" "$PLIST" 2>/dev/null || true
+        /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes array" "$PLIST"
+        /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes:0 string audio" "$PLIST"
+        /usr/libexec/PlistBuddy -c "Print" "$PLIST" | head -40
+
+workflows:
+  ios-soundforge:
+    <<: *base_ios
+    name: SoundForge iOS (signed)
     integrations:
       app_store_connect: codemagic
     environment:
       xcode: latest
       cocoapods: default
+      node: 20
       ios_signing:
         distribution_type: ad_hoc
         bundle_identifier: com.kingtweak69.soundforge
     scripts:
-      - name: Install Node dependencies
-        script: npm install --no-audit --no-fund
-      - name: Build web app
-        script: npm run build:web
-      - name: Create iOS project
-        script: |
-          if [ ! -d "ios" ]; then
-            npx cap add ios
-          fi
-          npx cap sync ios
+      - *build_web
+      - *make_ios
       - name: Apply iOS signing
         script: xcode-project use-profiles
       - name: Build signed IPA
@@ -31,25 +66,43 @@ workflows:
       - /tmp/xcodebuild_logs/*.log
 
   ios-soundforge-unsigned:
+    <<: *base_ios
     name: SoundForge iOS (unsigned)
-    max_build_duration: 60
-    instance_type: mac_mini_m2
-    environment:
-      xcode: latest
-      cocoapods: default
     scripts:
-      - name: Install Node dependencies
-        script: npm install --no-audit --no-fund
-      - name: Build web app
-        script: npm run build:web
-      - name: Create iOS project
-        script: |
-          if [ ! -d "ios" ]; then
-            npx cap add ios
-          fi
-          npx cap sync ios
+      - *build_web
+      - *make_ios
       - name: Build unsigned iOS app
-        script: xcodebuild -workspace ios/App/App.xcworkspace -scheme App -sdk iphoneos -configuration Release CODE_SIGNING_ALLOWED=NO build
+        script: |
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -sdk iphoneos \
+            -configuration Release \
+            -derivedDataPath build/dd \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+      - name: Package unsigned IPA
+        script: |
+          APP=$(find build/dd -name 'App.app' -type d | head -1)
+          test -n "$APP" || { echo "No App.app produced"; exit 1; }
+          mkdir -p build/Payload
+          cp -R "$APP" build/Payload/
+          cd build && zip -qry SoundForge-unsigned.ipa Payload
+          ls -lh SoundForge-unsigned.ipa
     artifacts:
-      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
+      - build/*.ipa
       - /tmp/xcodebuild_logs/*.log
+
+  web:
+    name: SoundForge web bundle
+    max_build_duration: 20
+    instance_type: linux_x2
+    environment:
+      node: 20
+    scripts:
+      - *build_web
+      - name: Zip the bundle
+        script: cd dist && zip -qry ../SoundForge-web.zip .
+    artifacts:
+      - SoundForge-web.zip
