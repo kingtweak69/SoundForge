@@ -55,9 +55,15 @@ soundforge/
 git clone https://github.com/kingtweak69/soundforge.git
 cd soundforge
 
-# Install dependencies
+# Install dependencies (includes both production and development tools)
 npm install
 ```
+
+### Dependency Notes
+
+- **Development**: The full `npm install` is required to develop, run the dev server, and build the application.
+- **Building Production Assets**: Even when building for production (`npm run build` or `npm run desktop:dist`), the development dependencies (like Vite, Tailwind, etc.) are required because they are used during the build process.
+- **Running Built Assets**: The output of the build (the `dist/` folder) contains only static assets (HTML, CSS, JavaScript) and does not require any Node.js dependencies to run when served by a static web server.
 
 ## Development
 
